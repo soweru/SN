@@ -1,0 +1,301 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>Штаб ассистента</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"><style>:root{color-scheme:light;box-sizing:border-box}body{margin:0;padding:0}img{max-width:100%}[hidden]{display:none!important}</style><style id="app-css">
+/* Layout: vault-style — left sidebar of branches, main pane with the open note; tasks sorted by deadline */
+:root{
+  --bg:#f5f4f8; --side:#ecebf2; --surface:#ffffff; --fg:#1e1c26; --muted:#6d6a7c; --line:#dedce8;
+  --accent:#7b5cd6; --accent-soft:#ece6fb; --late:#c4373b; --late-soft:#fbe7e7; --today:#b06d00; --today-soft:#fdf0d9; --ok:#2f7d55;
+  --s:#7b5cd6; --v:#c2417f; --w:#2f6fb0; --o:#6d6a7c;
+  --body:"Golos Text",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#18171d; --side:#1f1e26; --surface:#24232c; --fg:#e9e7f0; --muted:#9d99ad; --line:#34323f;
+  --accent:#a68cf2; --accent-soft:#2f2846; --late:#f07b7e; --late-soft:#3a2224; --today:#f0b44d; --today-soft:#3a2f1c; --ok:#6fd19c;
+  --s:#a68cf2; --v:#ef7fb3; --w:#78b3ef; --o:#9d99ad; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#18171d; --side:#1f1e26; --surface:#24232c; --fg:#e9e7f0; --muted:#9d99ad; --line:#34323f;
+  --accent:#a68cf2; --accent-soft:#2f2846; --late:#f07b7e; --late-soft:#3a2224; --today:#f0b44d; --today-soft:#3a2f1c; --ok:#6fd19c;
+  --s:#a68cf2; --v:#ef7fb3; --w:#78b3ef; --o:#9d99ad; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45}
+#app{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:100%}
+aside{background:var(--side);border-right:1px solid var(--line);padding-block:20px;padding-inline:14px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{font-weight:700;font-size:16px;padding:0 8px 4px}
+.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:2px}
+.navh{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 8px 6px;font-weight:600}
+.nav{display:flex;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;font-size:14px;color:var(--fg);background:none;border:0;border-radius:8px;padding:7px 8px;cursor:pointer}
+.nav:hover{background:var(--surface)}
+.nav.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav .ic{width:18px;text-align:center;color:var(--muted)}
+.nav.on .ic{color:var(--accent)}
+.nav .n{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.nav .n.late{color:var(--late)}
+main{padding-block:28px 80px;padding-inline:clamp(16px,4vw,48px);min-width:0;max-width:900px}
+.crumb{color:var(--muted);font-size:13px;margin-bottom:6px}
+h1{font-size:28px;line-height:1.15;margin:0 0 6px;text-wrap:balance;letter-spacing:-.3px}
+.lead{color:var(--muted);margin:0 0 20px;max-width:65ch}
+.save{font-size:12px;color:var(--muted);margin-left:8px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 22px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px}
+.stat b{display:block;font-size:22px;font-family:var(--mono)}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.late b{color:var(--late)} .stat.today b{color:var(--today)}
+.group{margin:22px 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;gap:8px;align-items:center}
+.group.late{color:var(--late)} .group.today{color:var(--today)}
+ul.tasks{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.task{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.task input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;width:20px;height:20px;margin-top:1px;border:2px solid var(--muted);border-radius:6px;cursor:pointer;display:grid;place-items:center;background:var(--surface)}
+.task input[type=checkbox]::after{content:"";width:5px;height:10px;border:solid var(--surface);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px);opacity:0}
+.task input[type=checkbox]:checked{background:var(--ok);border-color:var(--ok)}
+.task input[type=checkbox]:checked::after{opacity:1}
+.task input:focus-visible,.nav:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tbody{flex:1;min-width:0}
+.tt{overflow-wrap:anywhere}
+.tn{display:block;font-size:13px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{font-size:11.5px;padding:1px 8px;border-radius:10px;background:var(--bg);color:var(--muted);border:1px solid var(--line);white-space:nowrap;cursor:pointer}
+.chip.who-s{color:var(--s);border-color:color-mix(in srgb,var(--s) 40%,transparent)}
+.chip.who-v{color:var(--v);border-color:color-mix(in srgb,var(--v) 40%,transparent)}
+.chip.who-w{color:var(--w);border-color:color-mix(in srgb,var(--w) 40%,transparent)}
+.due{font-family:var(--mono);font-size:12px;flex:none;padding:2px 8px;border-radius:8px;background:var(--bg);color:var(--muted);white-space:nowrap}
+.due.late{background:var(--late-soft);color:var(--late)} .due.today{background:var(--today-soft);color:var(--today)}
+.task.done .tt{color:var(--muted);text-decoration:line-through}
+.task.done .due{opacity:.5}
+.del{flex:none;background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer;padding:0 2px;line-height:1}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 14px}
+.note h3{margin:0 0 8px;font-size:15px}
+.note ul,.note ol{margin:0;padding-left:20px}
+.note li{margin:4px 0}
+.note p{margin:0 0 6px}
+.wl{color:var(--accent);cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.graph{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 22px;overflow:hidden}
+.graph svg{display:block;width:100%;height:auto}
+.graph .lbl{font-family:var(--body);font-size:12px;fill:var(--fg)}
+.graph .cnt{font-family:var(--mono);font-size:10px;fill:var(--muted)}
+.graph g.node{cursor:pointer}
+.graph g.node:hover circle{stroke:var(--accent);stroke-width:2}
+form.add{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+form.add input,form.add select{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);min-width:0}
+form.add input[type=text]{flex:1 1 260px}
+form.add button{font:inherit;font-weight:600;padding:8px 14px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
+.ro{font-size:12px;color:var(--muted);margin-top:10px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:-8px 0 18px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.menu{display:none}
+@media (max-width:760px){
+  #app{grid-template-columns:1fr}
+  aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding-block:12px}
+  aside.closed .navwrap{display:none}
+  .menu{display:inline-block;font:inherit;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--fg);margin:6px 8px 0;cursor:pointer}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.login{min-height:100vh;display:grid;place-items:center;padding:16px}
+.lbox{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 24px;display:flex;flex-direction:column;gap:12px}
+.lbox h1{font-size:22px;margin:0}
+.lbox .lead{margin:0}
+.lbox label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.lbox input{font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.lbox button{font:inherit;font-weight:600;padding:10px 14px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
+.lbox button:disabled{opacity:.6}
+.lmsg{margin:0;font-size:13px;color:var(--late);min-height:1em}
+.acct{font-size:12px;color:var(--muted);padding:0 8px 4px;overflow-wrap:anywhere}
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script></head><body><div id="app"></div>
+<script>
+(function(){
+/* ===== Настройки Supabase: вставь свои значения ===== */
+var SB_URL="https://brcmiudpnkfnixmwwiah.supabase.co";
+var SB_KEY="sb_publishable_7G4ELL_cmOFREnt5IFwOdA_PFL4T0Gq";
+/* ==================================================== */
+
+var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+var S=null, version=0, pendingOps=[], saving=false, saveTimer=null, status="", userEmail="";
+var WHO={s:"София",v:"Светлана · напомнить",w:"Владимир · проследить",o:"Другие"};
+var view="overview", whoFilter=null;
+try{var lv=sessionStorage.getItem("sn-view");if(lv)view=lv;}catch(e){}
+
+function pad(n){return n<10?"0"+n:""+n}
+function todayISO(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+var TODAY=todayISO();
+var MON=["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
+var WD=["вс","пн","вт","ср","чт","пт","сб"];
+function fmt(d){var x=new Date(d+"T12:00:00");return WD[x.getDay()]+", "+x.getDate()+" "+MON[x.getMonth()]}
+function state(t){if(t.x)return"done";if(t.d<TODAY)return"late";if(t.d===TODAY)return"today";return"later"}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function sortT(a,b){if(!!a.x!==!!b.x)return a.x?1:-1;if(a.d!==b.d)return a.d<b.d?-1:1;return 0}
+function branch(id){for(var i=0;i<S.branches.length;i++)if(S.branches[i].id===id)return S.branches[i];return{name:id,ic:"•"}}
+function open(arr){return arr.filter(function(t){return!t.x})}
+var app=function(){return document.getElementById("app")};
+
+/* ---------- Вход ---------- */
+function showLogin(msg){
+  S=null;
+  app().innerHTML='<div class="login"><form class="lbox" id="lf"><h1>Штаб ассистента</h1><p class="lead">Войди, чтобы открыть задачи.</p>'+
+   '<label>Почта<input type="email" id="le" autocomplete="username" required></label>'+
+   '<label>Пароль<input type="password" id="lp" autocomplete="current-password" required></label>'+
+   '<button type="submit" id="lb">Войти</button><p class="lmsg" id="lm">'+esc(msg||"")+'</p></form></div>';
+  document.getElementById("lf").addEventListener("submit",function(e){
+    e.preventDefault();var b=document.getElementById("lb"),m=document.getElementById("lm");
+    b.disabled=true;m.textContent="Вхожу…";
+    sb.auth.signInWithPassword({email:document.getElementById("le").value.trim(),password:document.getElementById("lp").value}).then(function(r){
+      b.disabled=false;
+      if(r.error){m.textContent=/invalid/i.test(r.error.message)?"Неверная почта или пароль":"Не получилось войти: "+r.error.message;return}
+      start(r.data.session);
+    }).catch(function(){b.disabled=false;m.textContent="Ошибка сети — проверь интернет и попробуй ещё раз"});
+  });
+}
+function showMsg(t){app().innerHTML='<div class="login"><div class="lbox"><h1>Штаб ассистента</h1><p class="lead">'+esc(t)+'</p><button data-act="logout">Выйти</button></div></div>'}
+
+/* ---------- Загрузка и сохранение ---------- */
+function fetchBoard(){return sb.from("board").select("data,version").eq("id","main").maybeSingle()}
+function load(){
+  app().innerHTML='<div class="login"><p class="lead">Загружаю задачи…</p></div>';
+  fetchBoard().then(function(r){
+    if(r.error){showMsg("Не удалось загрузить задачи: "+r.error.message);return}
+    if(!r.data){showMsg("У аккаунта "+userEmail+" нет доступа к этим задачам.");return}
+    S=r.data.data;version=r.data.version;render();
+  }).catch(function(){showMsg("Ошибка сети — обнови страницу.")});
+}
+function start(session){userEmail=session&&session.user?session.user.email:"";load()}
+
+function applyOp(D,op){
+  if(op.k==="tog"){D.tasks.forEach(function(t){if(t.id===op.id){if(op.x)t.x=true;else delete t.x}})}
+  else if(op.k==="add"){if(!D.tasks.some(function(t){return t.id===op.t.id}))D.tasks.push(JSON.parse(JSON.stringify(op.t)))}
+  else if(op.k==="del"){D.tasks=D.tasks.filter(function(t){return t.id!==op.id})}
+}
+function doOp(op){applyOp(S,op);pendingOps.push(op);render();setStatus("Сохраняю…");clearTimeout(saveTimer);saveTimer=setTimeout(save,700)}
+function save(tries){
+  tries=tries||0;
+  if(saving||!pendingOps.length)return;
+  saving=true;var n=pendingOps.length;
+  sb.from("board").update({data:S,version:version+1,updated_at:new Date().toISOString()}).eq("id","main").eq("version",version).select("version").then(function(r){
+    saving=false;
+    if(r.error){setStatus("Не сохранилось — проверь интернет");saveTimer=setTimeout(save,5000);return}
+    if(!r.data||!r.data.length){
+      /* кто-то сохранил раньше — берём свежую версию и повторяем свои изменения поверх */
+      if(tries>3){setStatus("Не удалось сохранить — обнови страницу");return}
+      fetchBoard().then(function(f){
+        if(f.error||!f.data){setStatus("Не удалось сохранить — обнови страницу");return}
+        S=f.data.data;version=f.data.version;pendingOps.forEach(function(op){applyOp(S,op)});render();save(tries+1);
+      });
+      return;
+    }
+    version=r.data[0].version;pendingOps=pendingOps.slice(n);
+    if(pendingOps.length)save();else setStatus("Сохранено");
+  }).catch(function(){saving=false;setStatus("Не сохранилось — проверь интернет");saveTimer=setTimeout(save,5000)});
+}
+/* подтягиваем изменения другого человека, когда возвращаешься на вкладку */
+function refresh(){
+  if(!S||saving||pendingOps.length)return;
+  fetchBoard().then(function(r){if(r.data&&r.data.version!==version&&!pendingOps.length){S=r.data.data;version=r.data.version;render()}}).catch(function(){});
+}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)refresh()});
+setInterval(function(){if(!document.hidden)refresh()},60000);
+
+/* ---------- Отрисовка ---------- */
+function taskHTML(t,showBranch){
+  var st=state(t),b=branch(t.b);
+  return '<li class="task'+(t.x?" done":"")+'" data-id="'+esc(t.id)+'">'+
+   '<input type="checkbox" aria-label="Готово" '+(t.x?"checked ":"")+'data-act="tog">'+
+   '<div class="tbody"><span class="tt">'+esc(t.t)+'</span>'+(t.n?'<span class="tn">'+esc(t.n)+'</span>':"")+
+   '<div class="meta"><span class="chip who-'+esc(t.w)+'" data-act="who" data-w="'+esc(t.w)+'">'+esc(WHO[t.w]||t.w)+'</span>'+
+   (showBranch?'<span class="chip" data-act="go" data-v="b:'+esc(t.b)+'">'+esc(b.ic+" "+b.name)+'</span>':"")+'</div></div>'+
+   '<span class="due '+st+'">'+(st==="late"?"просрочено · ":st==="today"?"сегодня · ":"")+fmt(t.d)+'</span>'+
+   (t.c?'<button class="del" data-act="del" aria-label="Удалить">×</button>':"")+'</li>';
+}
+function listGrouped(arr,showBranch){
+  arr=arr.slice().sort(sortT);
+  var groups=[["late","Просрочено"],["today","Сегодня"],["later","Дальше"],["done","Сделано"]],h="";
+  groups.forEach(function(g){var xs=arr.filter(function(t){return state(t)===g[0]});
+    if(!xs.length)return;
+    h+='<div class="group '+g[0]+'">'+g[1]+' · '+xs.length+'</div><ul class="tasks">'+xs.map(function(t){return taskHTML(t,showBranch)}).join("")+'</ul>';});
+  return h||'<p class="lead">Здесь пока нет задач.</p>';
+}
+function addForm(def){
+  var opts=S.branches.filter(function(b){return b.id!=="focus"}).map(function(b){return'<option value="'+esc(b.id)+'"'+(b.id===def?" selected":"")+'>'+esc(b.name)+'</option>'}).join("");
+  return '<form class="add" id="addf"><input type="text" id="nt" placeholder="Новая задача" aria-label="Новая задача" required>'+
+   '<select id="nb" aria-label="Ветка">'+opts+'</select>'+
+   '<select id="nw" aria-label="Кто"><option value="s">София</option><option value="v">Светлана · напомнить</option><option value="w">Владимир · проследить</option><option value="o">Другие</option></select>'+
+   '<input type="date" id="nd" aria-label="Срок" required value="'+TODAY+'"><button type="submit">Добавить</button></form>';
+}
+function graphSVG(){
+  var bs=S.branches.filter(function(b){return b.id!=="focus"}),W=760,H=400,cx=W/2,cy=H/2,R=150,h="";
+  var pos=bs.map(function(b,i){var a=-Math.PI/2+i*2*Math.PI/bs.length;return{b:b,x:cx+Math.cos(a)*R*1.55,y:cy+Math.sin(a)*R}});
+  pos.forEach(function(p){h+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'" stroke="var(--line)" stroke-width="1.5"/>'});
+  pos.forEach(function(p){var ts=S.tasks.filter(function(t){return t.b===p.b.id}),o=open(ts).length,l=open(ts).filter(function(t){return state(t)==="late"}).length,r=10+Math.min(o,14)*1.3;
+    h+='<g class="node" data-act="go" data-v="b:'+esc(p.b.id)+'" tabindex="0"><circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+(l?"var(--late-soft)":"var(--accent-soft)")+'" stroke="'+(l?"var(--late)":"var(--accent)")+'" stroke-width="1.2"/>'+
+    '<text class="lbl" x="'+p.x.toFixed(1)+'" y="'+(p.y+r+15).toFixed(1)+'" text-anchor="middle">'+esc(p.b.name.length>24?p.b.name.slice(0,22)+"…":p.b.name)+'</text>'+
+    '<text class="cnt" x="'+p.x.toFixed(1)+'" y="'+(p.y+4).toFixed(1)+'" text-anchor="middle">'+o+'</text></g>'});
+  h+='<g class="node" data-act="go" data-v="b:focus" tabindex="0"><circle cx="'+cx+'" cy="'+cy+'" r="34" fill="var(--accent)"/><text x="'+cx+'" y="'+(cy-2)+'" text-anchor="middle" style="font:600 12px var(--body);fill:#fff">Фокус</text><text x="'+cx+'" y="'+(cy+13)+'" text-anchor="middle" style="font:600 12px var(--body);fill:#fff">Светланы</text></g>';
+  return '<div class="graph"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Карта веток">'+h+'</svg></div>';
+}
+function focusNote(){
+  /* Текст заметки хранится в базе (поле focusHtml), а не в коде страницы */
+  return S.focusHtml||"";
+}
+function navBtn(v,ic,label,n,late){
+  return '<button class="nav'+(view===v?" on":"")+'" data-act="go" data-v="'+esc(v)+'"><span class="ic">'+esc(ic)+'</span>'+esc(label)+(n!=null?'<span class="n'+(late?" late":"")+'">'+n+'</span>':"")+'</button>';
+}
+function render(){
+  if(!S)return;
+  TODAY=todayISO();
+  var all=S.tasks,op=open(all),late=op.filter(function(t){return state(t)==="late"}),tod=op.filter(function(t){return state(t)==="today"});
+  var side='<div class="brand">Штаб ассистента<small>Светлана · София</small></div><button class="menu" data-act="menu">Меню</button><div class="navwrap">'+
+   navBtn("overview","⌂","Обзор")+
+   navBtn("now","!","Сегодня и просрочено",late.length+tod.length,late.length>0)+
+   navBtn("who:v","♀","Напомнить Светлане",op.filter(function(t){return t.w==="v"}).length)+
+   navBtn("who:w","◎","Проследить за Владимиром",op.filter(function(t){return t.w==="w"}).length)+
+   navBtn("all","≡","Все задачи по срокам",op.length)+
+   '<div class="navh">Ветки</div>'+
+   S.branches.map(function(b){var ts=open(all.filter(function(t){return t.b===b.id}));var l=ts.some(function(t){return state(t)==="late"});
+     return navBtn("b:"+b.id,b.ic,b.name,b.id==="focus"?null:ts.length,l)}).join("")+
+   '<div class="navh">Аккаунт</div><div class="acct">'+esc(userEmail)+'</div><button class="nav" data-act="logout"><span class="ic">⏻</span>Выйти</button></div>';
+  var main="",title="",lead="",crumb="";
+  if(view==="overview"){
+    title="Обзор";lead="Все задачи с 2 октября, разложены по веткам и отсортированы по сроку: что раньше — то и делаем первым.";
+    main='<div class="stats"><div class="stat late"><b>'+late.length+'</b><span>просрочено</span></div><div class="stat today"><b>'+tod.length+'</b><span>на сегодня</span></div><div class="stat"><b>'+op.length+'</b><span>открыто</span></div><div class="stat"><b>'+all.filter(function(t){return t.x}).length+'</b><span>сделано</span></div></div>'+
+     graphSVG()+'<div class="legend"><span><i style="background:var(--s)"></i>София делает</span><span><i style="background:var(--v)"></i>Светлана — напомнить</span><span><i style="background:var(--w)"></i>Владимир — проследить</span></div>'+
+     '<div class="group">Ближайшие задачи</div>'+'<ul class="tasks">'+op.slice().sort(sortT).slice(0,8).map(function(t){return taskHTML(t,true)}).join("")+'</ul>';
+  } else if(view==="now"){
+    title="Сегодня и просрочено";lead="Сначала закрываем просроченное, потом сегодняшнее.";
+    main=listGrouped(late.concat(tod),true)+addForm("cal");
+  } else if(view==="all"){
+    title="Все задачи по срокам";lead="Одна лента: чем раньше срок, тем выше задача.";
+    main=listGrouped(all,true)+addForm("cal");
+  } else if(view.indexOf("who:")===0){
+    var w=view.slice(4);title=w==="v"?"Напомнить Светлане":"Проследить за Владимиром";
+    lead=w==="v"?"Это делает сама Светлана. Задача Софии — напоминать, пока не будет сделано.":"Это делает Владимир. Задача Софии — проверить к сроку и, если нужно, напомнить.";
+    main=listGrouped(all.filter(function(t){return t.w===w}),true)+addForm("team");
+  } else if(view.indexOf("b:")===0){
+    var bid=view.slice(2),b=branch(bid);title=b.name;crumb="Ветки / "+b.name;
+    if(bid==="focus"){lead="Заметка для Светланы и Софии: на чём держим фокус.";main=focusNote()+'<div class="group">Для Светланы лично</div>'+listGrouped(all.filter(function(t){return t.b==="focus"}),false);}
+    else{lead="Задачи ветки по сроку.";main=listGrouped(all.filter(function(t){return t.b===bid}),false)+addForm(bid);}
+  } else {view="overview";return render()}
+  app().innerHTML='<aside id="side">'+side+'</aside><main><div class="crumb">'+esc(crumb||"Штаб ассистента")+'<span class="save" id="save">'+esc(status)+'</span></div><h1>'+esc(title)+'</h1><p class="lead">'+esc(lead)+'</p>'+main+'</main>';
+  if(window.innerWidth<760&&view!=="overview"){var s=document.getElementById("side");if(s)s.classList.add("closed")}
+  var f=document.getElementById("addf");
+  if(f)f.addEventListener("submit",function(e){e.preventDefault();var t=document.getElementById("nt").value.trim(),d=document.getElementById("nd").value;if(!t||!d)return;
+    doOp({k:"add",t:{id:"c"+Date.now(),b:document.getElementById("nb").value,t:t,w:document.getElementById("nw").value,d:d,c:true}});});
+}
+function setStatus(s){status=s;var el=document.getElementById("save");if(el)el.textContent=s}
+
+document.addEventListener("click",function(e){
+  var el=e.target.closest("[data-act]");if(!el)return;var a=el.getAttribute("data-act");
+  if(a==="logout"){sb.auth.signOut().finally(function(){pendingOps=[];showLogin()});return}
+  if(!S)return;
+  if(a==="go"){view=el.getAttribute("data-v");try{sessionStorage.setItem("sn-view",view)}catch(x){}render();window.scrollTo(0,0);}
+  else if(a==="who"){view="who:"+el.getAttribute("data-w");if(el.getAttribute("data-w")==="s"||el.getAttribute("data-w")==="o")view="all";render();}
+  else if(a==="menu"){document.getElementById("side").classList.toggle("closed")}
+  else if(a==="del"){if(confirm("Удалить задачу?"))doOp({k:"del",id:el.closest("[data-id]").getAttribute("data-id")});}
+});
+document.addEventListener("change",function(e){
+  if(!S||e.target.getAttribute("data-act")!=="tog")return;
+  doOp({k:"tog",id:e.target.closest("[data-id]").getAttribute("data-id"),x:e.target.checked});
+});
+document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target.matches("g.node")){e.preventDefault();e.target.dispatchEvent(new MouseEvent("click",{bubbles:true}))}});
+window.addEventListener("beforeunload",function(e){if(pendingOps.length){e.preventDefault();e.returnValue=""}});
+
+sb.auth.getSession().then(function(r){if(r.data&&r.data.session)start(r.data.session);else showLogin()}).catch(function(){showLogin()});
+sb.auth.onAuthStateChange(function(ev){if(ev==="SIGNED_OUT"&&S)showLogin("Сессия закончилась — войди снова")});
+})();
+</script>
+</body></html>
